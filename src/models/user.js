@@ -10,6 +10,7 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
   {
@@ -52,9 +53,35 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordMatch(async function (password) {
+userSchema.methods.isPasswordMatch = async function (password) {
   return await bcrypt.compare(password, this.password);
-});
+};
+
+userSchema.methods.generateAccessToken = async function () {
+  jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+    },
+    process.env.ACCESSTOKEN_SECRET_KEY,
+    {
+      expiresIn: ACCESSTOKEN_EXP_TIME,
+    }
+  );
+};
+
+userSchema.methods.generateRefreshToken = async function () {
+  jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET_KEY,
+    {
+      expiresIn: REFRESH_TOKEN_EXP_TIME,
+    }
+  );
+};
 
 userSchema.plugin(mongooseAggregatePaginate);
 
