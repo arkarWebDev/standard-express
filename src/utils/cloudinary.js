@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
 
+// config
 cloudinary.config({
   cloud_name: "dfl5rzss0",
   api_key: "749591279322661",
@@ -10,14 +10,12 @@ cloudinary.config({
 export const uploadFileToCloudinary = async (filePath) => {
   try {
     if (!filePath) return null;
-
     const response = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
     });
-    console.log("File upload successful.", response.url);
-    fs.unlinkSync(filePath);
+    console.log("File upload complete", response.url);
   } catch (error) {
-    fs.unlinkSync(filePath);
+    console.log(error);
     return null;
   }
 };
