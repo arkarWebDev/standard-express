@@ -8,14 +8,13 @@
 //   }
 
 import mongoose, { Schema } from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
   {
     username: {
-      type: Boolean,
+      type: String,
       required: true,
       unique: true,
       lowercase: true,
@@ -37,6 +36,12 @@ const userSchema = new Schema(
     profile_photo: {
       type: String,
     },
+    cover_photo: {
+      type: String,
+    },
+    refresh_token: {
+      type: String,
+    },
     posts: [
       {
         type: Schema.Types.ObjectId,
@@ -49,7 +54,7 @@ const userSchema = new Schema(
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
@@ -82,7 +87,5 @@ userSchema.methods.generateRefreshToken = async function () {
     }
   );
 };
-
-userSchema.plugin(mongooseAggregatePaginate);
 
 export const User = mongoose.model("User", userSchema);
