@@ -10,6 +10,9 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const userSchema = new Schema(
   {
@@ -69,9 +72,9 @@ userSchema.methods.generateAccessToken = async function () {
       email: this.email,
       username: this.username,
     },
-    process.env.ACCESSTOKEN_SECRET_KEY,
+    process.env.ACCESS_TOKEN_SECRET_KEY,
     {
-      expiresIn: ACCESSTOKEN_EXP_TIME,
+      expiresIn: process.env.ACCESS_TOKEN_EXP_TIME,
     }
   );
 };
@@ -83,7 +86,7 @@ userSchema.methods.generateRefreshToken = async function () {
     },
     process.env.REFRESH_TOKEN_SECRET_KEY,
     {
-      expiresIn: REFRESH_TOKEN_EXP_TIME,
+      expiresIn: process.env.REFRESH_TOKEN_EXP_TIME,
     }
   );
 };
