@@ -134,7 +134,7 @@ export const generateNewRefreshToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET_KEY
     );
 
-    const existingUser = User.findById(decodedToken?._id);
+    const existingUser = await User.findById(decodedToken?._id);
     if (!existingUser) {
       return res.status(404).json({ message: "No user found." });
     }
@@ -158,6 +158,41 @@ export const generateNewRefreshToken = async (req, res) => {
       .json({ message: "Token updated." });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ message: "Something went wrong." });
+  }
+};
+
+export const logoutController = async (req, res) => {
+  if (!req.user || !req.user._id) {
+    return res.status(400).json({ message: "Logout Unauthorized" });
+  }
+
+  try {
+    await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $unset: {
+          refresh_token: 1,
+        },
+      },
+      { new: true }
+    );
+
+    const existingUser = await User.findById(req.user._id);
+    console.log(existingUser);
+
+    const options = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    };
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({ message: `${req.user.username} logout successfully.` });
+  } catch (error) {
+    console.log("Logout error :", error);
     return res.status(500).json({ message: "Something went wrong." });
   }
 };
